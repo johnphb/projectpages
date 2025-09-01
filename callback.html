@@ -1,40 +1,48 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <title>Spotify OAuth Redirect</title>
+  <meta charset="UTF-8" />
+  <title>Spotify OAuth Redirect</title>
 </head>
 <body>
-    <h1>Spotify OAuth Redirect</h1>
-    <p id="code-display">Authorization Code wird geladen...</p>
+  <h1>Spotify OAuth Redirect</h1>
+  <p id="status">Sende Authorization Code an Server...</p>
 
-    <script>
-        // URL-Parameter auslesen
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        const error = params.get('error');
+  <script>
+    // Authorization Code aus URL auslesen
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const error = params.get('error');
+    const statusEl = document.getElementById('status');
 
-        const display = document.getElementById('code-display');
-
-        if (error) {
-            display.textContent = `Fehler bei der Autorisierung: ${error}`;
-        } else if (code) {
-            display.textContent = `Authorization Code: ${code}`;
-
-            // Optional: Hier kannst du den Code an deinen Backend-Server senden
-            // Beispiel:
-            /*
-            fetch('/auth/callback', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ code: code })
-            }).then(response => {
-                // handle response
-            });
-            */
-        } else {
-            display.textContent = 'Kein Authorization Code gefunden.';
+    if (error) {
+      statusEl.textContent = `Fehler bei der Autorisierung: ${error}`;
+    } else if (code) {
+      // Code an dein Backend senden
+      fetch('https://dein-backend.example.com/api/spotify/callback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code: code })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Serverantwort nicht OK');
         }
-    </script>
+        return response.text();
+      })
+      .then(data => {
+        statusEl.textContent = 'Authorization Code erfolgreich gesendet!';
+        console.log('Serverantwort:', data);
+      })
+      .catch(err => {
+        statusEl.textContent = 'Fehler beim Senden des Codes an den Server.';
+        console.error(err);
+      });
+    } else {
+      statusEl.textContent = 'Kein Authorization Code in der URL gefunden.';
+    }
+  </script>
 </body>
 </html>
