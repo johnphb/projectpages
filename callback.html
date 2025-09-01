@@ -19,7 +19,7 @@
       statusEl.textContent = `Fehler bei der Autorisierung: ${error}`;
     } else if (code) {
       // Code an dein Backend senden
-      fetch('https://dein-backend.example.com/api/spotify/callback', {
+      fetch('http://localhost:8888/api/spotify/callback', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
